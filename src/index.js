@@ -3,5 +3,7 @@ var { app, PORT, HOST } = require("./server");
 
 // Run the server
 app.listen(PORT, HOST, () => {
-  console.log(`ExpressJS Social Gaming API is now running!`);
+  console.log(`
+  ExpressJS Social Gaming API is now running!
+  `);
 });
