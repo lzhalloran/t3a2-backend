@@ -2,7 +2,7 @@
 const request = require("supertest");
 
 // Import the app
-var { app } = require("../server");
+var { app } = require("../src/server");
 
 // Default Route tests.
 describe("Default route exists.", () => {
