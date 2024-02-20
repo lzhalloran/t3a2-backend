@@ -19,12 +19,12 @@ jobs:
     - name: Start MongoDB
       uses: supercharge/mongodb-github-action@1.10.0
       with: 
-        mongodb-version: '7.05'
+        mongodb-version: latest
 
     - run: npm install
 
     - run: npm run build --if-present
-    
+
     - run: npm run test-ci
       env:
         CI: true
