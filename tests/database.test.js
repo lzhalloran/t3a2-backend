@@ -7,7 +7,6 @@ const { databaseConnector, databaseDisconnector } = require("../src/database");
 // Test databaseConnector
 describe("Database Connector", () => {
   test("Database connection readyState is 1 (connected)", async () => {
-    console.log("Node ENV: " + process.env.NODE_ENV);
     expect(mongoose.connection.readyState).toEqual(0);
     await databaseConnector();
     expect(mongoose.connection.readyState).toEqual(1);
