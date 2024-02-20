@@ -7,15 +7,18 @@ const { databaseConnector, databaseDisconnector } = require("../src/database");
 // Test databaseConnector
 describe("Database Connector", () => {
   test("Database connection readyState is 1 (connected)", async () => {
+    expect(mongoose.connection.readyState).toEqual(0);
     await databaseConnector();
     expect(mongoose.connection.readyState).toEqual(1);
-  });
-});
-
-// Test databaseDisconnector
-describe("Database Disconnector", () => {
-  test("Database disconnection readyState is 0 (disconnected)", async () => {
     await databaseDisconnector();
     expect(mongoose.connection.readyState).toEqual(0);
   });
 });
+
+// Test databaseDisconnector
+// describe("Database Disconnector", () => {
+//   test("Database disconnection readyState is 0 (disconnected)", async () => {
+//     await databaseDisconnector();
+//     expect(mongoose.connection.readyState).toEqual(0);
+//   });
+// });
