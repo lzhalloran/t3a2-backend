@@ -19,3 +19,36 @@ describe("Default route exists.", () => {
     expect(response.body.message).toEqual("Welcome to T3A2 API!");
   });
 });
+
+// Database Health Route tests.
+describe("Database Health route...", () => {
+  // Import mongoose for database functionality
+  const mongoose = require("mongoose");
+  // Import connector and disconnector from database to test
+  const { databaseConnector, databaseDisconnector } = require("../src/database");
+
+  it("can get the route with status code 200", async() => {
+    // Connect database
+    await databaseConnector();
+
+    const response = await request(app).get("/databaseHealth");
+    expect(response.statusCode).toEqual(200);
+
+    // Disconnect database
+    await databaseDisconnector();
+  });
+  it("connection health properties return as expected", async() => {
+    // Connect database
+    await databaseConnector();
+
+    const response = await request(app).get("/databaseHealth");
+    const health = response.body;
+    expect(health.readyState).toEqual(mongoose.connection.readyState);
+    expect(health.dbName).toEqual(mongoose.connection.name);
+    expect(health.dbModels).toEqual(mongoose.connection.modelNames());
+    expect(health.dbHost).toEqual(mongoose.connection.host);
+
+    // Disconnect database
+    await databaseDisconnector();
+  })
+});
