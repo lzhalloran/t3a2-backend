@@ -17,7 +17,7 @@ let decipher = crypto.createDecipheriv(encAlgorithm, encPrivateKey, encIV);
 // Encrypt a plaintext string
 function encryptString(plainText) {
   cipher = crypto.createCipheriv(encAlgorithm, encPrivateKey, encIV);
-  return cipher.update(plaintext, "utf8", "hex") + cipher.final("hex");
+  return cipher.update(plainText, "utf8", "hex") + cipher.final("hex");
 }
 
 // Decrypt an encrypted string
@@ -114,6 +114,9 @@ async function getUserByID(userID) {
 
 // Update user with new data
 async function updateUser(userData) {
+  userData.updatedData.password = await hashString(
+    userData.updatedData.password
+  );
   return await User.findByIdAndUpdate(userData.userID, userData.updatedData, {
     returnDocument: "after",
   }).exec();

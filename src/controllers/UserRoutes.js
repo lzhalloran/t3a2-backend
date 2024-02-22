@@ -73,13 +73,13 @@ router.get("/:userID", async (request, response) => {
 });
 
 // Update a user by ID
-router.get("/:userID", async (request, response) => {
+router.put("/:userID", async (request, response) => {
   let userData = {
     userID: request.params.userID,
-    updatedData: request.body.newUserData,
+    updatedData: request.body,
   };
 
-  response.json(await updateUser(userDetails));
+  response.json(await updateUser(userData));
 });
 
 // Delete a user by ID
