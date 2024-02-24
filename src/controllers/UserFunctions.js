@@ -127,6 +127,50 @@ async function deleteUser(userID) {
   return await User.findByIdAndDelete(userID).exec();
 }
 
+// ------ Middleware functions ------
+
+// Ensure the given JWT from Headers is valid, provide
+// a refreshed JWT to keep the JWT valid for longer
+const verifyJWTHeader = async (request, response, next) => {
+  let rawJWTHeader = request.headers.jwt;
+
+  let refreshedJWT = await verifyUserJWT(rawJWTHeader);
+
+  request.headers.jwt = refreshedJWT;
+  next();
+}
+
+// Retrieve the userID from verified JWT, add to header
+const verifyJWTUserID = async (request, response, next) => {
+  let userJWTVerified = jwt.verify(request.headers.jwt, process.env.JWT_SECRET, {complete: true});
+  let decryptedJWTPayload = decryptString(userJWTVerified.payload.data);
+  let userData = JSON.parse(decryptedJWTPayload);
+
+  request.headers.userID = userData.userID;
+  next();
+}
+
+// Validate user email uniqueness
+const uniqueEmailCheck = async (request, response, next) => {
+  let isEmailinUse = await User.exists({email: request.body.email}).exec();
+  if (isEmailinUse) {
+    next(new Error("An account with this email address already exists."));
+  } else {
+    next();
+  }
+}
+
+// General middleware to handle errors
+const handleErrors = async (error, request, response, next) => {
+  if (error) {
+    response.status(500).json({
+      error: error.message
+    })
+  } else {
+    next();
+  }
+}
+
 // ------ Exports ------
 
 module.exports = {
@@ -142,4 +186,8 @@ module.exports = {
   getUserByID,
   updateUser,
   deleteUser,
+  verifyJWTHeader,
+  verifyJWTUserID,
+  uniqueEmailCheck,
+  handleErrors,
 };
