@@ -27,45 +27,45 @@ const {
 } = require("./UserFunctions");
 
 // Register a new user
-router.post("/register", handleErrors, async (request, response) => {
-  let userData = {
-    email: request.body.email,
-    password: request.body.password,
-    handle: request.body.handle,
-    about: request.body.about,
-  };
-  let newUser = await createUser(userData);
-
-  response.json({
-    user: newUser,
-  });
-});
-
-// Login an existing user
 router.post(
-  "/login",
+  "/register",
   uniqueEmailCheck,
   handleErrors,
   async (request, response) => {
-    let userFromDatabase = await User.findOne({
+    let userData = {
       email: request.body.email,
-    }).exec();
+      password: request.body.password,
+      handle: request.body.handle,
+      about: request.body.about,
+    };
+    let newUser = await createUser(userData);
 
-    if (
-      await validateHashedData(request.body.password, userFromDatabase.password)
-    ) {
-      let encryptedUserJWT = await generateUserJWT({
-        userID: userFromDatabase.id,
-        email: userFromDatabase.email,
-        password: userFromDatabase.password,
-      });
-
-      response.json(encryptedUserJWT);
-    } else {
-      response.status(400).json({ message: "Invalid user details provided." });
-    }
+    response.json({
+      user: newUser,
+    });
   }
 );
+
+// Login an existing user
+router.post("/login", handleErrors, async (request, response) => {
+  let userFromDatabase = await User.findOne({
+    email: request.body.email,
+  }).exec();
+
+  if (
+    await validateHashedData(request.body.password, userFromDatabase.password)
+  ) {
+    let encryptedUserJWT = await generateUserJWT({
+      userID: userFromDatabase.id,
+      email: userFromDatabase.email,
+      password: userFromDatabase.password,
+    });
+
+    response.json(encryptedUserJWT);
+  } else {
+    response.status(400).json({ message: "Invalid user details provided." });
+  }
+});
 
 // Refresh a user's JWT
 router.post("/refresh-token", handleErrors, async (request, response) => {
