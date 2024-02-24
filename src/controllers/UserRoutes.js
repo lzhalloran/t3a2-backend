@@ -20,6 +20,9 @@ const {
   getUserByID,
   updateUser,
   deleteUser,
+  verifyJWTHeader,
+  verifyJWTUserID,
+  onlyAllowUserInParams,
 } = require("./UserFunctions");
 
 // Register a new user
@@ -67,25 +70,44 @@ router.post("/refresh-token", async (request, response) => {
   response.json(refreshJWT);
 });
 
-// Read a user by ID
+// Read a user by ID in params
 router.get("/:userID", async (request, response) => {
   response.json(await getUserByID(request.params.userID));
 });
 
-// Update a user by ID
-router.put("/:userID", async (request, response) => {
+// Read a user by ID in JWT
+router.get("/", verifyJWTHeader, verifyJWTUserID, async (request, response) => {
+  response.json(await getUserByID(request.headers.userID));
+});
+
+// Update a user by ID in JWT
+router.put("/", verifyJWTHeader, verifyJWTUserID, async (request, response) => {
   let userData = {
-    userID: request.params.userID,
+    userID: request.headers.userID,
     updatedData: request.body,
   };
-
-  response.json(await updateUser(userData));
+  let userFromDatabase = await updateUser(userData);
+  let encryptedUserJWT = await generateUserJWT({
+    userID: userFromDatabase.id,
+    email: userFromDatabase.email,
+    password: userFromDatabase.password,
+  });
+  response.json({
+    user: userFromDatabase,
+    jwt: encryptedUserJWT,
+  });
+  //response.json(await updateUser(userData));
 });
 
-// Delete a user by ID
-router.delete("/:userID", async (request, response) => {
-  response.json(await deleteUser(request.params.userID));
-});
+// Delete a user by ID in JWT
+router.delete(
+  "/",
+  verifyJWTHeader,
+  verifyJWTUserID,
+  async (request, response) => {
+    response.json(await deleteUser(request.headers.userID));
+  }
+);
 
 // Export the router so it can be used elsewhere
 module.exports = router;

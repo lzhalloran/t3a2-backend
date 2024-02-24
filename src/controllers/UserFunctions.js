@@ -127,6 +127,29 @@ async function deleteUser(userID) {
   return await User.findByIdAndDelete(userID).exec();
 }
 
+// ------ Middleware functions ------
+
+// Ensure the given JWT from Headers is valid, provide
+// a refreshed JWT to keep the JWT valid for longer
+const verifyJWTHeader = async (request, response, next) => {
+  let rawJWTHeader = request.headers.jwt;
+
+  let refreshedJWT = await verifyUserJWT(rawJWTHeader);
+
+  request.headers.jwt = refreshedJWT;
+  next();
+}
+
+// Retrieve the userID from verified JWT, add to header
+const verifyJWTUserID = async (request, response, next) => {
+  let userJWTVerified = jwt.verify(request.headers.jwt, process.env.JWT_SECRET, {complete: true});
+  let decryptedJWTPayload = decryptString(userJWTVerified.payload.data);
+  let userData = JSON.parse(decryptedJWTPayload);
+
+  request.headers.userID = userData.userID;
+  next();
+}
+
 // ------ Exports ------
 
 module.exports = {
@@ -142,4 +165,6 @@ module.exports = {
   getUserByID,
   updateUser,
   deleteUser,
+  verifyJWTHeader,
+  verifyJWTUserID,
 };
