@@ -30,6 +30,7 @@ router.post("/register", async (request, response) => {
     handle: request.body.handle,
     about: request.body.about,
   };
+
   let newUser = await createUser(userData);
 
   response.json({
