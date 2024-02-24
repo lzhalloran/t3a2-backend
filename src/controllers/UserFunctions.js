@@ -150,6 +150,27 @@ const verifyJWTUserID = async (request, response, next) => {
   next();
 }
 
+// Validate user email uniqueness
+const uniqueEmailCheck = async (request, response, next) => {
+  let isEmailinUse = await User.exists({email: request.body.email}).exec();
+  if (isEmailinUse) {
+    next(new Error("An account with this email address already exists."));
+  } else {
+    next();
+  }
+}
+
+// General middleware to handle errors
+const handleErrors = async (error, request, response, next) => {
+  if (error) {
+    response.status(500).json({
+      error: error.message
+    })
+  } else {
+    next();
+  }
+}
+
 // ------ Exports ------
 
 module.exports = {
@@ -167,4 +188,6 @@ module.exports = {
   deleteUser,
   verifyJWTHeader,
   verifyJWTUserID,
+  uniqueEmailCheck,
+  handleErrors,
 };
