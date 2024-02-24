@@ -22,11 +22,12 @@ const {
   deleteUser,
   verifyJWTHeader,
   verifyJWTUserID,
-  onlyAllowUserInParams,
+  uniqueEmailCheck,
+  handleErrors,
 } = require("./UserFunctions");
 
 // Register a new user
-router.post("/register", async (request, response) => {
+router.post("/register", handleErrors, async (request, response) => {
   let userData = {
     email: request.body.email,
     password: request.body.password,
@@ -41,28 +42,33 @@ router.post("/register", async (request, response) => {
 });
 
 // Login an existing user
-router.post("/login", async (request, response) => {
-  let userFromDatabase = await User.findOne({
-    email: request.body.email,
-  }).exec();
+router.post(
+  "/login",
+  uniqueEmailCheck,
+  handleErrors,
+  async (request, response) => {
+    let userFromDatabase = await User.findOne({
+      email: request.body.email,
+    }).exec();
 
-  if (
-    await validateHashedData(request.body.password, userFromDatabase.password)
-  ) {
-    let encryptedUserJWT = await generateUserJWT({
-      userID: userFromDatabase.id,
-      email: userFromDatabase.email,
-      password: userFromDatabase.password,
-    });
+    if (
+      await validateHashedData(request.body.password, userFromDatabase.password)
+    ) {
+      let encryptedUserJWT = await generateUserJWT({
+        userID: userFromDatabase.id,
+        email: userFromDatabase.email,
+        password: userFromDatabase.password,
+      });
 
-    response.json(encryptedUserJWT);
-  } else {
-    response.status(400).json({ message: "Invalid user details provided." });
+      response.json(encryptedUserJWT);
+    } else {
+      response.status(400).json({ message: "Invalid user details provided." });
+    }
   }
-});
+);
 
 // Refresh a user's JWT
-router.post("/refresh-token", async (request, response) => {
+router.post("/refresh-token", handleErrors, async (request, response) => {
   let oldJWT = request.body.jwt;
   let refreshJWT = await verifyUserJWT(oldJWT).catch((error) => {
     return { error: error.message };
@@ -71,39 +77,52 @@ router.post("/refresh-token", async (request, response) => {
 });
 
 // Read a user by ID in params
-router.get("/:userID", async (request, response) => {
+router.get("/:userID", handleErrors, async (request, response) => {
   response.json(await getUserByID(request.params.userID));
 });
 
 // Read a user by ID in JWT
-router.get("/", verifyJWTHeader, verifyJWTUserID, async (request, response) => {
-  response.json(await getUserByID(request.headers.userID));
-});
+router.get(
+  "/",
+  verifyJWTHeader,
+  verifyJWTUserID,
+  handleErrors,
+  async (request, response) => {
+    response.json(await getUserByID(request.headers.userID));
+  }
+);
 
 // Update a user by ID in JWT
-router.put("/", verifyJWTHeader, verifyJWTUserID, async (request, response) => {
-  let userData = {
-    userID: request.headers.userID,
-    updatedData: request.body,
-  };
-  let userFromDatabase = await updateUser(userData);
-  let encryptedUserJWT = await generateUserJWT({
-    userID: userFromDatabase.id,
-    email: userFromDatabase.email,
-    password: userFromDatabase.password,
-  });
-  response.json({
-    user: userFromDatabase,
-    jwt: encryptedUserJWT,
-  });
-  //response.json(await updateUser(userData));
-});
+router.put(
+  "/",
+  verifyJWTHeader,
+  verifyJWTUserID,
+  handleErrors,
+  async (request, response) => {
+    let userData = {
+      userID: request.headers.userID,
+      updatedData: request.body,
+    };
+    let userFromDatabase = await updateUser(userData);
+    let encryptedUserJWT = await generateUserJWT({
+      userID: userFromDatabase.id,
+      email: userFromDatabase.email,
+      password: userFromDatabase.password,
+    });
+    response.json({
+      user: userFromDatabase,
+      jwt: encryptedUserJWT,
+    });
+    //response.json(await updateUser(userData));
+  }
+);
 
 // Delete a user by ID in JWT
 router.delete(
   "/",
   verifyJWTHeader,
   verifyJWTUserID,
+  handleErrors,
   async (request, response) => {
     response.json(await deleteUser(request.headers.userID));
   }
