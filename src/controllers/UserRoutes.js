@@ -113,8 +113,20 @@ router.put(
   "/",
   verifyJWTHeader,
   verifyJWTUserID,
+  body("email").isEmail().normalizeEmail(),
+  body("password").trim().escape().isLength({ min: 8 }),
+  body("username").trim().escape().isLength({ min: 3 }),
+  body("name").trim().escape().isLength({ min: 1 }),
+  uniqueEmailCheck,
+  uniqueUsernameCheck,
   handleErrors,
   async (request, response) => {
+    // If validation failed, return a response with code 400
+    const errors = validationResult(request);
+    if (!errors.isEmpty()) {
+      return response.status(400).json({ errors: errors.array() });
+    }
+
     let userData = {
       userID: request.headers.userID,
       updatedData: request.body,
