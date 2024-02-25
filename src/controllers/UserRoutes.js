@@ -35,8 +35,9 @@ router.post(
     let userData = {
       email: request.body.email,
       password: request.body.password,
-      handle: request.body.handle,
-      about: request.body.about,
+      username: request.body.username,
+      about: "",
+      name: request.body.name,
     };
     let newUser = await createUser(userData);
 
@@ -49,7 +50,7 @@ router.post(
 // Login an existing user
 router.post("/login", handleErrors, async (request, response) => {
   let userFromDatabase = await User.findOne({
-    email: request.body.email,
+    username: request.body.username,
   }).exec();
 
   if (
