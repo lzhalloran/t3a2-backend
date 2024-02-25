@@ -26,6 +26,7 @@ const {
   verifyJWTHeader,
   verifyJWTUserID,
   uniqueEmailCheck,
+  uniqueUsernameCheck,
   handleErrors,
 } = require("./UserFunctions");
 
@@ -37,8 +38,15 @@ router.post(
   body("username").trim().escape().isLength({ min: 3 }),
   body("name").trim().escape().isLength({ min: 1 }),
   uniqueEmailCheck,
+  uniqueUsernameCheck,
   handleErrors,
   async (request, response) => {
+    // If validation failed, return a response with code 400
+    const errors = validationResult(request);
+    if (!errors.isEmpty()) {
+      return response.status(400).json({ errors: errors.array() });
+    }
+
     let userData = {
       email: request.body.email,
       password: request.body.password,
