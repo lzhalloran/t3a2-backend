@@ -6,6 +6,9 @@ const router = express.Router();
 // Import the model
 const { User } = require("../models/UserModel");
 
+// Import express validator for standard validation
+const { body, validationResult } = require('express-validator');
+
 // Import the controller functions
 const {
   encryptString,
@@ -29,6 +32,10 @@ const {
 // Register a new user
 router.post(
   "/register",
+  body("email").isEmail().normalizeEmail(),
+  body("password").trim().escape().isLength({ min: 8 }),
+  body("username").trim().escape().isLength({ min: 3 }),
+  body("name").trim().escape().isLength({ min: 1 }),
   uniqueEmailCheck,
   handleErrors,
   async (request, response) => {
