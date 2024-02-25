@@ -27,14 +27,18 @@ const {
 } = require("./UserFunctions");
 
 // Register a new user
-router.post("/register", async (request, response) => {
-  let userData = {
-    email: request.body.email,
-    password: request.body.password,
-    handle: request.body.handle,
-    about: request.body.about,
-  };
-  let newUser = await createUser(userData);
+router.post(
+  "/register",
+  uniqueEmailCheck,
+  handleErrors,
+  async (request, response) => {
+    let userData = {
+      email: request.body.email,
+      password: request.body.password,
+      handle: request.body.handle,
+      about: request.body.about,
+    };
+    let newUser = await createUser(userData);
 
     response.json({
       user: newUser,
