@@ -5,8 +5,9 @@ const mongoose = require("mongoose");
 const UserSchema = new mongoose.Schema({
   email: String,
   password: String,
-  handle: String,
+  username: String,
   about: String,
+  name: String,
 });
 
 // Make a model based on the above schema

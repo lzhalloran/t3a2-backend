@@ -100,8 +100,9 @@ async function createUser(userData) {
   let newUser = new User({
     email: userData.email,
     password: userData.hashedPassword,
-    handle: userData.handle,
+    username: userData.username,
     about: userData.about,
+    name: userData.name,
   });
 
   return await newUser.save();
