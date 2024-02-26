@@ -154,7 +154,6 @@ describe("User update route...", () => {
         password: "testPassword1",
       });
       encryptedUserJWT = loginResponse._body;
-      console.log(loginResponse._body)
 
     });
   
