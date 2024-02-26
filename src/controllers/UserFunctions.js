@@ -68,6 +68,7 @@ async function generateUserJWT(userData) {
 // Otherwise, send an Error that we need to sign in.
 async function verifyUserJWT(userJWT) {
   // Verify that the JWT is still valid.
+  console.log(userJWT);
   let userJwtVerified = jwt.verify(userJWT, process.env.JWT_SECRET, {
     complete: true,
   });
@@ -161,6 +162,16 @@ const uniqueEmailCheck = async (request, response, next) => {
   }
 }
 
+// Validate username uniqueness
+const uniqueUsernameCheck = async (request, response, next) => {
+  let isUsernameinUse = await User.exists({username: request.body.username}).exec();
+  if (isUsernameinUse) {
+    next(new Error("An account with this username already exists."));
+  } else {
+    next();
+  }
+}
+
 // General middleware to handle errors
 const handleErrors = async (error, request, response, next) => {
   if (error) {
@@ -190,5 +201,6 @@ module.exports = {
   verifyJWTHeader,
   verifyJWTUserID,
   uniqueEmailCheck,
+  uniqueUsernameCheck,
   handleErrors,
 };
