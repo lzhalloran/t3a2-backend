@@ -68,6 +68,7 @@ async function generateUserJWT(userData) {
 // Otherwise, send an Error that we need to sign in.
 async function verifyUserJWT(userJWT) {
   // Verify that the JWT is still valid.
+  console.log(userJWT);
   let userJwtVerified = jwt.verify(userJWT, process.env.JWT_SECRET, {
     complete: true,
   });
