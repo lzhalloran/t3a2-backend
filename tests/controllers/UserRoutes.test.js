@@ -124,6 +124,57 @@ describe("User register route...", () => {
   });
 });
 
+// Login Route tests.
+describe("User login route...", () => {
+  // Import mongoose for database functionality
+  const mongoose = require("mongoose");
+  // Import connector and disconnector from database to test
+  const {
+    databaseConnector,
+    databaseDisconnector,
+  } = require("../../src/database");
+
+  // connect and clean up before using the database
+  beforeAll(async () => {
+    await databaseConnector();
+    await User.deleteMany({});
+
+    // user to login
+    const response = await request(app).post("/users/register").send({
+      email: "testUser@email.com",
+      password: "testPassword1",
+      username: "testUser",
+      name: "Test User",
+    });
+  });
+
+  // disconnect and clean up after using the database
+  afterAll(async () => {
+    await User.deleteMany({});
+    await databaseDisconnector();
+  });
+
+  it("can login user with appropriate data", async () => {
+    const response = await request(app)
+      .post("/users/login")
+      .send({
+        password: "testPassword1",
+        username: "testUser",
+      });
+    expect(response.statusCode).toEqual(200);
+  });
+
+  it("login fails with incorrect password", async () => {
+    const response = await request(app)
+      .post("/users/login")
+      .send({
+        password: "testp2",
+        username: "testUser",
+      });
+    expect(response.statusCode).toEqual(400);
+  })
+
+});
 
 // Update Route tests.
 describe("User update route...", () => {
