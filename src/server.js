@@ -28,7 +28,11 @@ app.use(
 // "https://deployedApp.com" is a placeholder
 const cors = require("cors");
 var corsOptions = {
-  origin: ["http://localhost:5000", "https://deployedApp.com"],
+  origin: [
+    "http://localhost:5000",
+    "http://localhost:3000",
+    "https://convokers.netlify.app/",
+  ],
   optionsSuccessStatus: 200,
 };
 app.use(cors(corsOptions));
