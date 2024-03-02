@@ -69,7 +69,8 @@ router.post("/login", handleErrors, async (request, response) => {
   }).exec();
 
   if (
-    await validateHashedData(request.body.password, userFromDatabase.password)
+    userFromDatabase &&
+    (await validateHashedData(request.body.password, userFromDatabase.password))
   ) {
     let encryptedUserJWT = await generateUserJWT({
       userID: userFromDatabase.id,

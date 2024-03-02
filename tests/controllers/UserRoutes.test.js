@@ -164,6 +164,14 @@ describe("User login route...", () => {
     expect(response.statusCode).toEqual(200);
   });
 
+  it("login fails with incorrect username", async () => {
+    const response = await request(app).post("/users/login").send({
+      password: "testPassword1",
+      username: "testYser",
+    });
+    expect(response.statusCode).toEqual(400);
+  });
+
   it("login fails with incorrect password", async () => {
     const response = await request(app)
       .post("/users/login")
