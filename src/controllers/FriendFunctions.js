@@ -25,8 +25,10 @@ async function acceptFriendRequest(acceptingUser, requestingUser) {
 // Reject a friend request
 async function rejectFriendRequest(rejectingUser, requestingUser) {
   rejectingUser.receivedFriends.pull(requestingUser._id.toString());
+  rejectingUser.requestedFriends.pull(requestingUser._id.toString());
   let updatedRejectingUser = await rejectingUser.save();
   requestingUser.requestedFriends.pull(rejectingUser._id.toString());
+  requestingUser.receivedFriends.pull(rejectingUser._id.toString());
   let updatedRequestingUser = await requestingUser.save();
 }
 
