@@ -109,6 +109,17 @@ router.get(
   }
 );
 
+// Get a user by username
+router.get("/username/:username", handleErrors, async (request, response) => {
+  const user = await User.findOne({ username: request.params.username });
+
+  if (user) {
+    response.json(user);
+  } else {
+    response.status(400).json({ message: "User not found"});
+  }
+});
+
 // Update a user by ID in JWT
 router.put(
   "/",
