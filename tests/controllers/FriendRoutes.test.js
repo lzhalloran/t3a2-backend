@@ -448,3 +448,80 @@ describe("Delete friend route...", () => {
     expect(response.body).toHaveProperty("error");
   });
 });
+
+// View Friends route
+describe("View friends route...", () => {
+  // Import mongoose for database functionality
+  const mongoose = require("mongoose");
+  // Import connector and disconnector from database to test
+  const {
+    databaseConnector,
+    databaseDisconnector,
+  } = require("../../src/database");
+
+  let encryptedUser1JWT = "";
+  let encryptedUser2JWT = "";
+
+  // connect to the database, seed data
+  beforeAll(async () => {
+    await databaseConnector();
+    await User.deleteMany({});
+
+    // user1
+    let response = await request(app).post("/users/register").send({
+      email: "user1@email.com",
+      password: "password1",
+      username: "user1",
+      name: "User One",
+    });
+    let loginResponse = await request(app).post("/users/login").send({
+      username: "user1",
+      password: "password1",
+    });
+    encryptedUser1JWT = loginResponse._body;
+
+    // user2
+    response = await request(app).post("/users/register").send({
+      email: "user2@email.com",
+      password: "password2",
+      username: "user2",
+      name: "User Two",
+    });
+    loginResponse = await request(app).post("/users/login").send({
+      username: "user2",
+      password: "password2",
+    });
+    encryptedUser2JWT = loginResponse._body;
+
+    // friend request from user 1 to user 2
+    response = await request(app)
+      .post("/friends/add/user2")
+      .set("jwt", encryptedUser1JWT)
+      .send({});
+    encryptedUser1JWT = response.body.jwt;
+
+    // user 2 accepts request from user 1
+    response = await request(app)
+      .put("/friends/accept/user1")
+      .set("jwt", encryptedUser2JWT)
+      .send({});
+    encryptedUser2JWT = response.body.jwt;
+  });
+
+  // disconnect and clean up after using the database
+  afterAll(async () => {
+    await User.deleteMany({});
+    await databaseDisconnector();
+  });
+
+  it("can get a list of friends with valid JWT", async () => {
+    const response = await request(app)
+      .get("/friends/")
+      .set("jwt", encryptedUser1JWT)
+      .send({});
+    expect(response.statusCode).toEqual(200);
+    expect(response.body).toHaveProperty("friends");
+    expect(response.body.friends[0].username).toEqual("user2");
+    encryptedUser1JWT = response.body.jwt;
+  });
+});

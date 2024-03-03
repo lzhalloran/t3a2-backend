@@ -40,6 +40,17 @@ async function deleteFriend(jwtUser, otherUser) {
     let updatedOtherUser = await otherUser.save();
 }
 
+// View friends list
+async function viewFriends(userID) {
+    const user = await getUserByID(userID);
+    let friendObjects = [];
+    for (const friend of user.friends) {
+        let friendObject = await User.findById(friend).exec();
+        friendObjects.push(friendObject);
+    }
+    return friendObjects;
+}
+
 // ------ Middleware ------
 
 // Verify a user exists by username provided in params
@@ -110,4 +121,5 @@ module.exports = {
   notAlreadyFriends,
   alreadyFriends,
   deleteFriend,
+  viewFriends,
 };

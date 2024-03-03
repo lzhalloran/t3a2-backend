@@ -39,6 +39,7 @@ const {
   friendRequestSent,
   alreadyFriends,
   deleteFriend,
+  viewFriends,
 } = require("./FriendFunctions");
 
 // Create a new friend request
@@ -155,6 +156,27 @@ router.delete(
 
     response.json({
       message: "Friend deleted successfully",
+      jwt: request.headers.jwt,
+    });
+  }
+);
+
+// View friends by jwt
+router.get(
+  "/",
+  verifyJWTHeader,
+  verifyJWTUserID,
+  handleErrors,
+  async (request, response) => {
+    // If validation failed, return a response with code 400
+    const errors = validationResult(request);
+    if (!errors.isEmpty()) {
+      return response.status(400).json({ errors: errors.array() });
+    }
+
+    const friendsList = await viewFriends(request.headers.userID);
+    response.json({
+      friends: friendsList,
       jwt: request.headers.jwt,
     });
   }
