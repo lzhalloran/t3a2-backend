@@ -33,6 +33,10 @@ const {
   verifyParamsUsername,
   createFriendRequest,
   acceptFriendRequest,
+  rejectFriendRequest,
+  friendRequestNotSent,
+  notAlreadyFriends,
+  friendRequestSent,
 } = require("./FriendFunctions");
 
 // Create a new friend request
@@ -41,6 +45,8 @@ router.post(
   verifyJWTHeader,
   verifyJWTUserID,
   verifyParamsUsername,
+  friendRequestNotSent,
+  notAlreadyFriends,
   handleErrors,
   async (request, response) => {
     // If validation failed, return a response with code 400
@@ -64,11 +70,13 @@ router.post(
 );
 
 // Accept a friend request
-router.post(
+router.put(
   "/accept/:username",
   verifyJWTHeader,
   verifyJWTUserID,
   verifyParamsUsername,
+  friendRequestSent,
+  notAlreadyFriends,
   handleErrors,
   async (request, response) => {
     // If validation failed, return a response with code 400
@@ -86,6 +94,36 @@ router.post(
 
     response.json({
       message: "Friend request accepted successfully",
+      jwt: request.headers.jwt,
+    });
+  }
+);
+
+// Reject a friend request
+router.delete(
+  "/reject/:username",
+  verifyJWTHeader,
+  verifyJWTUserID,
+  verifyParamsUsername,
+  friendRequestSent,
+  notAlreadyFriends,
+  handleErrors,
+  async (request, response) => {
+    // If validation failed, return a response with code 400
+    const errors = validationResult(request);
+    if (!errors.isEmpty()) {
+      return response.status(400).json({ errors: errors.array() });
+    }
+
+    rejectingUser = await getUserByID(request.headers.userID);
+    requestingUser = await User.findOne({
+      username: request.params.username,
+    });
+
+    rejectFriendRequest(rejectingUser, requestingUser);
+
+    response.json({
+      message: "Friend request rejected successfully",
       jwt: request.headers.jwt,
     });
   }

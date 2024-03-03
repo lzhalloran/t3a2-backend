@@ -1,36 +1,33 @@
 // Require corresponding model to create relevant functionality
 const { User } = require("../models/UserModel");
+const { getUserByID } = require("./UserFunctions");
 
 // ------ Database ------
 
 // Create a new friend request
 async function createFriendRequest(requestingUser, otherUser) {
-  requestingUser.requestedFriends.push(otherUser._id);
+  requestingUser.requestedFriends.push(otherUser._id.toString());
   let updatedRequestingUser = await requestingUser.save();
-  otherUser.receivedFriends.push(requestingUser._id);
+  otherUser.receivedFriends.push(requestingUser._id.toString());
   let updatedOtherUser = await otherUser.save();
-  console.log(
-    "Updated friend request: " +
-      JSON.stringify(updatedRequestingUser) +
-      " & " +
-      JSON.stringify(updatedOtherUser)
-  );
 }
 
 // Accept a friend request
 async function acceptFriendRequest(acceptingUser, requestingUser) {
-    acceptingUser.receivedFriends.pull(requestingUser._id);
-    acceptingUser.friends.push(requestingUser._id);
-    let updatedAcceptingUser = await acceptingUser.save();
-    requestingUser.requestedFriends.pull(acceptingUser._id);
-    requestingUser.friends.push(acceptingUser._id);
-    let updatedRequestingUser = await requestingUser.save();
-    console.log(
-        "Updated friend request: " +
-          JSON.stringify(updatedAcceptingUser) +
-          " & " +
-          JSON.stringify(updatedRequestingUser)
-      );
+  acceptingUser.receivedFriends.pull(requestingUser._id.toString());
+  acceptingUser.friends.push(requestingUser._id.toString());
+  let updatedAcceptingUser = await acceptingUser.save();
+  requestingUser.requestedFriends.pull(acceptingUser._id.toString());
+  requestingUser.friends.push(acceptingUser._id.toString());
+  let updatedRequestingUser = await requestingUser.save();
+}
+
+// Reject a friend request
+async function rejectFriendRequest(rejectingUser, requestingUser) {
+  rejectingUser.receivedFriends.pull(requestingUser._id.toString());
+  let updatedRejectingUser = await rejectingUser.save();
+  requestingUser.requestedFriends.pull(rejectingUser._id.toString());
+  let updatedRequestingUser = await requestingUser.save();
 }
 
 // ------ Middleware ------
@@ -45,10 +42,49 @@ const verifyParamsUsername = async (request, response, next) => {
   }
 };
 
+// Check if a friend request has not already been sent
+const friendRequestNotSent = async (request, response, next) => {
+  let jwtUser = await getUserByID(request.headers.userID);
+  let otherUser = await User.findOne({ username: request.params.username });
+  if (jwtUser.requestedFriends.includes(otherUser._id.toString())) {
+    next(new Error("Friend request already sent"));
+  } else if (otherUser.requestedFriends.includes(jwtUser._id.toString())) {
+    next(new Error("Friend request already received"));
+  } else {
+    next();
+  }
+};
+
+// Check if a friend request has already been sent
+const friendRequestSent = async (request, response, next) => {
+  let jwtUser = await getUserByID(request.headers.userID);
+  let otherUser = await User.findOne({ username: request.params.username });
+  if (jwtUser.receivedFriends.includes(otherUser._id.toString())) {
+    next();
+  } else {
+    next(new Error("Friend request has not been received"));
+  }
+};
+
+// Check if jwtuser and params user are friends
+const notAlreadyFriends = async (request, response, next) => {
+  let jwtUser = await getUserByID(request.headers.userID);
+  let otherUser = await User.findOne({ username: request.params.username });
+  if (jwtUser.friends.includes(otherUser._id.toString())) {
+    next(new Error("Already friends with this user"));
+  } else {
+    next();
+  }
+};
+
 // ------ Exports ------
 
 module.exports = {
   createFriendRequest,
   acceptFriendRequest,
+  rejectFriendRequest,
   verifyParamsUsername,
+  friendRequestNotSent,
+  friendRequestSent,
+  notAlreadyFriends,
 };
