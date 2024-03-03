@@ -17,6 +17,22 @@ async function createFriendRequest(requestingUser, otherUser) {
   );
 }
 
+// Accept a friend request
+async function acceptFriendRequest(acceptingUser, requestingUser) {
+    acceptingUser.receivedFriends.pull(requestingUser._id);
+    acceptingUser.friends.push(requestingUser._id);
+    let updatedAcceptingUser = await acceptingUser.save();
+    requestingUser.requestedFriends.pull(acceptingUser._id);
+    requestingUser.friends.push(acceptingUser._id);
+    let updatedRequestingUser = await requestingUser.save();
+    console.log(
+        "Updated friend request: " +
+          JSON.stringify(updatedAcceptingUser) +
+          " & " +
+          JSON.stringify(updatedRequestingUser)
+      );
+}
+
 // ------ Middleware ------
 
 // Verify a user exists by username provided in params
@@ -33,5 +49,6 @@ const verifyParamsUsername = async (request, response, next) => {
 
 module.exports = {
   createFriendRequest,
+  acceptFriendRequest,
   verifyParamsUsername,
 };

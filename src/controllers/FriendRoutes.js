@@ -32,6 +32,7 @@ const {
 const {
   verifyParamsUsername,
   createFriendRequest,
+  acceptFriendRequest,
 } = require("./FriendFunctions");
 
 // Create a new friend request
@@ -57,6 +58,34 @@ router.post(
 
     response.json({
       message: "Friend request sent successfully",
+      jwt: request.headers.jwt,
+    });
+  }
+);
+
+// Accept a friend request
+router.post(
+  "/accept/:username",
+  verifyJWTHeader,
+  verifyJWTUserID,
+  verifyParamsUsername,
+  handleErrors,
+  async (request, response) => {
+    // If validation failed, return a response with code 400
+    const errors = validationResult(request);
+    if (!errors.isEmpty()) {
+      return response.status(400).json({ errors: errors.array() });
+    }
+
+    acceptingUser = await getUserByID(request.headers.userID);
+    requestingUser = await User.findOne({
+      username: request.params.username,
+    });
+
+    acceptFriendRequest(acceptingUser, requestingUser);
+
+    response.json({
+      message: "Friend request accepted successfully",
       jwt: request.headers.jwt,
     });
   }

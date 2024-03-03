@@ -8,8 +8,8 @@ const { response } = require("express");
 // Import the model
 const { User } = require("../../src/models/UserModel");
 
-// Request Friend route
-describe("Friend request route...", () => {
+// Request Friend routes
+describe("Friend request routes...", () => {
   // Import mongoose for database functionality
   const mongoose = require("mongoose");
   // Import connector and disconnector from database to test
@@ -87,5 +87,19 @@ describe("Friend request route...", () => {
       .send({});
     expect(response.statusCode).toEqual(500);
     expect(response.body).toHaveProperty("error");
+  });
+
+  it("can accept a request with valid JWT, other user name", async () => {
+    const response = await request(app)
+      .post("/friends/accept/user1")
+      .set("jwt", encryptedUser2JWT)
+      .send({});
+    expect(response.statusCode).toEqual(200);
+    expect(response.body).toHaveProperty("message");
+    expect(response.body.message).toEqual(
+      "Friend request accepted successfully"
+    );
+
+    encryptedUser1JWT = response.body.jwt;
   });
 });
