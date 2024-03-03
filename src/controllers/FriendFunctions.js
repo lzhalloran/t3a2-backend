@@ -32,6 +32,14 @@ async function rejectFriendRequest(rejectingUser, requestingUser) {
   let updatedRequestingUser = await requestingUser.save();
 }
 
+// Delete a friend
+async function deleteFriend(jwtUser, otherUser) {
+    jwtUser.friends.pull(otherUser._id.toString());
+    otherUser.friends.pull(jwtUser._id.toString());
+    let updatedJwtUser = await jwtUser.save();
+    let updatedOtherUser = await otherUser.save();
+}
+
 // ------ Middleware ------
 
 // Verify a user exists by username provided in params
@@ -68,7 +76,7 @@ const friendRequestSent = async (request, response, next) => {
   }
 };
 
-// Check if jwtuser and params user are friends
+// Check if jwtuser and params user are not friends
 const notAlreadyFriends = async (request, response, next) => {
   let jwtUser = await getUserByID(request.headers.userID);
   let otherUser = await User.findOne({ username: request.params.username });
@@ -78,6 +86,17 @@ const notAlreadyFriends = async (request, response, next) => {
     next();
   }
 };
+
+// Check if jwtuser and params user and friends
+const alreadyFriends = async (request, response, next) => {
+    let jwtUser = await getUserByID(request.headers.userID);
+  let otherUser = await User.findOne({ username: request.params.username });
+  if (jwtUser.friends.includes(otherUser._id.toString())) {
+    next();
+  } else {
+    next(new Error("Already friends with this user"));
+  }
+}
 
 // ------ Exports ------
 
@@ -89,4 +108,6 @@ module.exports = {
   friendRequestNotSent,
   friendRequestSent,
   notAlreadyFriends,
+  alreadyFriends,
+  deleteFriend,
 };

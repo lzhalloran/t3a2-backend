@@ -37,6 +37,8 @@ const {
   friendRequestNotSent,
   notAlreadyFriends,
   friendRequestSent,
+  alreadyFriends,
+  deleteFriend,
 } = require("./FriendFunctions");
 
 // Create a new friend request
@@ -124,6 +126,35 @@ router.delete(
 
     response.json({
       message: "Friend request rejected successfully",
+      jwt: request.headers.jwt,
+    });
+  }
+);
+
+// Delete a friend
+router.delete(
+  "/:username",
+  verifyJWTHeader,
+  verifyJWTUserID,
+  verifyParamsUsername,
+  alreadyFriends,
+  handleErrors,
+  async (request, response) => {
+    // If validation failed, return a response with code 400
+    const errors = validationResult(request);
+    if (!errors.isEmpty()) {
+      return response.status(400).json({ errors: errors.array() });
+    }
+
+    jwtUser = await getUserByID(request.headers.userID);
+    otherUser = await User.findOne({
+      username: request.params.username,
+    });
+
+    deleteFriend(jwtUser, otherUser);
+
+    response.json({
+      message: "Friend deleted successfully",
       jwt: request.headers.jwt,
     });
   }
