@@ -230,28 +230,11 @@ describe("User update route...", () => {
       .put("/users/")
       .set("jwt", encryptedUserJWT)
       .send({
-        email: "testUser2@email.com",
         password: "testPassword2",
-        username: "test2",
         name: "bobby2",
         about: "hi I'm bobby",
       });
     expect(response.statusCode).toEqual(200);
-  });
-
-  it("returns error details if email is invalid", async () => {
-    const response = await request(app)
-      .put("/users/")
-      .set("jwt", encryptedUserJWT)
-      .send({
-        email: "t",
-        password: "testPassword2",
-        username: "test2",
-        name: "bobby2",
-        about: "hi I'm bobby",
-      });
-    expect(response.statusCode).toEqual(400);
-    expect(response.body).toHaveProperty("errors");
   });
 
   it("returns error details if password is too short", async () => {
@@ -259,24 +242,7 @@ describe("User update route...", () => {
       .put("/users/")
       .set("jwt", encryptedUserJWT)
       .send({
-        email: "testUser2@email.com",
         password: "testPas",
-        username: "test2",
-        name: "bobby2",
-        about: "hi I'm bobby",
-      });
-    expect(response.statusCode).toEqual(400);
-    expect(response.body).toHaveProperty("errors");
-  });
-
-  it("returns error details if username is too short", async () => {
-    const response = await request(app)
-      .put("/users/")
-      .set("jwt", encryptedUserJWT)
-      .send({
-        email: "testUser2@email.com",
-        password: "testPassword2",
-        username: "te",
         name: "bobby2",
         about: "hi I'm bobby",
       });
@@ -289,9 +255,7 @@ describe("User update route...", () => {
       .put("/users/")
       .set("jwt", encryptedUserJWT)
       .send({
-        email: "testUser2@email.com",
         password: "testPassword2",
-        username: "test2",
         name: "",
         about: "hi I'm bobby",
       });
