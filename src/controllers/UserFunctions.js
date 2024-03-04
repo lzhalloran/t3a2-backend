@@ -128,6 +128,28 @@ async function updateUser(userData) {
   }).exec();
 }
 
+// Update user with new partial data
+async function partialUpdateUser(userData) {
+  jwtUser = await getUserByID(userData.userID);
+  // if(userData.updatedData.password) {
+  //   userData.updatedData.password = await hashString(
+  //     userData.updatedData.password
+  //   );
+  // } else {
+  //   userData.updatedData.password = jwtUser.password;
+  // }
+  userData.updatedData.password = userData.updatedData.password ? await hashString(userData.updatedData.password) : jwtUser.password;
+  userData.updatedData.name = userData.updatedData.name ? userData.updatedData.name : jwtUser.name;
+  userData.updatedData.about = userData.updatedData.about ? userData.updatedData.about : jwtUser.about;
+  userData.updatedData.username = jwtUser.username;
+  userData.updatedData.email = jwtUser.email;
+
+  
+  return await User.findByIdAndUpdate(userData.userID, userData.updatedData, {
+    returnDocument: "after",
+  }).exec();
+}
+
 // Delete user by ID
 async function deleteUser(userID) {
   return await User.findByIdAndDelete(userID).exec();
@@ -211,6 +233,7 @@ module.exports = {
   createUser,
   getUserByID,
   updateUser,
+  partialUpdateUser,
   deleteUser,
   verifyJWTHeader,
   verifyJWTUserID,
