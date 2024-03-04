@@ -10,3 +10,9 @@ const PostSchema = new mongoose.Schema({
   gameCategory: String,
   time: { type: Date, default: Date.now },
 });
+
+// A model based on the above schema
+const Post = mongoose.model("Post", PostSchema);
+
+// Make the model available elsewhere
+module.exports = { Post };
