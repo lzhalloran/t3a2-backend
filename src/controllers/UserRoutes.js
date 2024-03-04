@@ -22,6 +22,7 @@ const {
   createUser,
   getUserByID,
   updateUser,
+  partialUpdateUser,
   deleteUser,
   verifyJWTHeader,
   verifyJWTUserID,
@@ -116,7 +117,7 @@ router.get("/username/:username", handleErrors, async (request, response) => {
   if (user) {
     response.json(user);
   } else {
-    response.status(400).json({ message: "User not found"});
+    response.status(400).json({ message: "User not found" });
   }
 });
 
@@ -154,6 +155,36 @@ router.put(
       jwt: encryptedUserJWT,
     });
     //response.json(await updateUser(userData));
+  }
+);
+
+// Partial update a user by ID in JWT
+router.patch(
+  "/",
+  verifyJWTHeader,
+  verifyJWTUserID,
+  handleErrors,
+  async (request, response) => {
+    // If validation failed, return a response with code 400
+    const errors = validationResult(request);
+    if (!errors.isEmpty()) {
+      return response.status(400).json({ errors: errors.array() });
+    }
+
+    let userData = {
+      userID: request.headers.userID,
+      updatedData: request.body,
+    };
+    let userFromDatabase = await partialUpdateUser(userData);
+    let encryptedUserJWT = await generateUserJWT({
+      userID: userFromDatabase.id,
+      email: userFromDatabase.email,
+      password: userFromDatabase.password,
+    });
+    response.json({
+      user: userFromDatabase,
+      jwt: encryptedUserJWT,
+    });
   }
 );
 

@@ -263,4 +263,75 @@ describe("User update route...", () => {
     expect(response.body).toHaveProperty("errors");
   });
 });
-  
+
+// Partial Update Route tests.
+describe("User partial update route...", () => {
+  // Import mongoose for database functionality
+  const mongoose = require("mongoose");
+  // Import connector and disconnector from database to test
+  const {
+    databaseConnector,
+    databaseDisconnector,
+  } = require("../../src/database");
+
+  let encryptedUserJWT = "";
+
+  // connect and clean up before using the database
+  beforeAll(async () => {
+    await databaseConnector();
+  });
+
+  // recreate the example user after each test
+  beforeEach(async () => {
+    await User.deleteMany({});
+
+    // user to update
+    const response = await request(app).post("/users/register").send({
+      email: "testUser@email.com",
+      password: "testPassword1",
+      username: "testUser",
+      name: "Test User",
+    });
+    const loginResponse = await request(app).post("/users/login").send({
+      username: "testUser",
+      password: "testPassword1",
+    });
+    encryptedUserJWT = loginResponse._body;
+  });
+
+  // disconnect and clean up after using the database
+  afterAll(async () => {
+    await User.deleteMany({});
+    await databaseDisconnector();
+  });
+
+  it("can update user password", async () => {
+    const response = await request(app)
+      .patch("/users/")
+      .set("jwt", encryptedUserJWT)
+      .send({
+        password: "testPassword2",
+      });
+    expect(response.statusCode).toEqual(200);
+  });
+
+  it("can update user name", async () => {
+    const response = await request(app)
+      .patch("/users/")
+      .set("jwt", encryptedUserJWT)
+      .send({
+        name: "bobby2",
+      });
+    expect(response.statusCode).toEqual(200);
+  });
+
+  it("can update user about", async () => {
+    const response = await request(app)
+      .patch("/users/")
+      .set("jwt", encryptedUserJWT)
+      .send({
+        about: "hi I'm bobby",
+      });
+    expect(response.statusCode).toEqual(200);
+  });
+});
