@@ -125,12 +125,8 @@ router.put(
   "/",
   verifyJWTHeader,
   verifyJWTUserID,
-  body("email").isEmail().normalizeEmail(),
   body("password").trim().escape().isLength({ min: 8 }),
-  body("username").trim().escape().isLength({ min: 3 }),
   body("name").trim().escape().isLength({ min: 1 }),
-  uniqueEmailCheck,
-  uniqueUsernameCheck,
   handleErrors,
   async (request, response) => {
     // If validation failed, return a response with code 400
@@ -143,6 +139,10 @@ router.put(
       userID: request.headers.userID,
       updatedData: request.body,
     };
+    user = await getUserByID(request.headers.userID);
+    userData.updatedData.username = user.username;
+    userData.updatedData.email = user.email;
+
     let userFromDatabase = await updateUser(userData);
     let encryptedUserJWT = await generateUserJWT({
       userID: userFromDatabase.id,
