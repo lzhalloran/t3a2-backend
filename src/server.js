@@ -74,6 +74,8 @@ const usersController = require("./controllers/UserRoutes");
 app.use("/users", usersController);
 const friendsController = require("./controllers/FriendRoutes");
 app.use("/friends", friendsController);
+const postsController = require("./controllers/PostRoutes");
+app.use("/posts", postsController);
 
 // Keep this route at the end, before exports.
 // A 404 route should only trigger if no preceding routes or middleware was run.
