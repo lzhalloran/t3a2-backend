@@ -118,6 +118,11 @@ async function getUserByID(userID) {
   return await User.findById(userID);
 }
 
+// Read all users
+async function getUsers(){
+  return await User.find();
+}
+
 // Update user with new data
 async function updateUser(userData) {
   userData.updatedData.password = await hashString(
@@ -232,6 +237,7 @@ module.exports = {
   verifyUserJWT,
   createUser,
   getUserByID,
+  getUsers,
   updateUser,
   partialUpdateUser,
   deleteUser,
