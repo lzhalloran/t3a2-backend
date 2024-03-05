@@ -123,7 +123,7 @@ router.get("/username/:username", handleErrors, async (request, response) => {
 });
 
 // Get all users
-router.get("/all", handleErrors, async (request, response) => {
+router.get("/list/all", handleErrors, async (request, response) => {
   response.json(await getUsers());
 });
 
