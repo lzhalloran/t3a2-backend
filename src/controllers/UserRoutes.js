@@ -29,6 +29,7 @@ const {
   uniqueEmailCheck,
   uniqueUsernameCheck,
   handleErrors,
+  getUsers,
 } = require("./UserFunctions");
 
 // Register a new user
@@ -119,6 +120,11 @@ router.get("/username/:username", handleErrors, async (request, response) => {
   } else {
     response.status(400).json({ message: "User not found" });
   }
+});
+
+// Get all users
+router.get("/all", handleErrors, async (request, response) => {
+  response.json(await getUsers());
 });
 
 // Update a user by ID in JWT
