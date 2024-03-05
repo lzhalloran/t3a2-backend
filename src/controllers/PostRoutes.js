@@ -71,7 +71,6 @@ router.patch(
 
     response.json({
       post: updatedPost,
-      jwt: encryptedUserJWT,
     });
   }
 );

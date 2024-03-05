@@ -57,7 +57,7 @@ const verifyUserIsAuthor = async (request, response, next) => {
 
 // Verify the JWT username matches the post author by postID
 const verifyUserIsAuthorByPostID = async (request, response, next) => {
-  let user = await User.findByID(request.headers.userID);
+  let user = await User.findById(request.headers.userID);
   let post = await Post.findById(request.params.postID);
 
   let userIsAuthor = user.username === post.author;
