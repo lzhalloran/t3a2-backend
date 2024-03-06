@@ -51,6 +51,28 @@ async function viewFriends(userID) {
     return friendObjects;
 }
 
+// View requested friends list
+async function viewRequestedFriends(userID) {
+  const user = await getUserByID(userID);
+  let friendObjects = [];
+  for (const friend of user.requestedFriends) {
+      let friendObject = await User.findById(friend).exec();
+      friendObjects.push(friendObject);
+  }
+  return friendObjects;
+}
+
+// View received friends list
+async function viewReceivedFriends(userID) {
+  const user = await getUserByID(userID);
+  let friendObjects = [];
+  for (const friend of user.receivedFriends) {
+      let friendObject = await User.findById(friend).exec();
+      friendObjects.push(friendObject);
+  }
+  return friendObjects;
+}
+
 // ------ Middleware ------
 
 // Verify a user exists by username provided in params
@@ -122,4 +144,6 @@ module.exports = {
   alreadyFriends,
   deleteFriend,
   viewFriends,
+  viewReceivedFriends,
+  viewRequestedFriends,
 };
