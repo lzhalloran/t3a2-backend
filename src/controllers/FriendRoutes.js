@@ -40,6 +40,8 @@ const {
   alreadyFriends,
   deleteFriend,
   viewFriends,
+  viewRequestedFriends,
+  viewReceivedFriends,
 } = require("./FriendFunctions");
 
 // Create a new friend request
@@ -177,6 +179,52 @@ router.get(
     const friendsList = await viewFriends(request.headers.userID);
     response.json({
       friends: friendsList,
+      jwt: request.headers.jwt,
+    });
+  }
+);
+
+// View requested friends by jwt
+router.get(
+  "/requested",
+  verifyJWTHeader,
+  verifyJWTUserID,
+  handleErrors,
+  async (request, response) => {
+    // If validation failed, return a response with code 400
+    const errors = validationResult(request);
+    if (!errors.isEmpty()) {
+      return response.status(400).json({ errors: errors.array() });
+    }
+
+    const requestedFriendsList = await viewRequestedFriends(
+      request.headers.userID
+    );
+    response.json({
+      requestedFriends: requestedFriendsList,
+      jwt: request.headers.jwt,
+    });
+  }
+);
+
+// View received friends by jwt
+router.get(
+  "/received",
+  verifyJWTHeader,
+  verifyJWTUserID,
+  handleErrors,
+  async (request, response) => {
+    // If validation failed, return a response with code 400
+    const errors = validationResult(request);
+    if (!errors.isEmpty()) {
+      return response.status(400).json({ errors: errors.array() });
+    }
+
+    const receivedFriendsList = await viewReceivedFriends(
+      request.headers.userID
+    );
+    response.json({
+      receivedFriends: receivedFriendsList,
       jwt: request.headers.jwt,
     });
   }
