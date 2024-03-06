@@ -11,6 +11,7 @@ const UserSchema = new mongoose.Schema({
   requestedFriends: [String],
   receivedFriends: [String],
   friends: [String],
+  follows: [String],
 });
 
 // Make a model based on the above schema

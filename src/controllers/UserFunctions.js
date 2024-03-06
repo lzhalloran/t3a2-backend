@@ -160,6 +160,23 @@ async function deleteUser(userID) {
   return await User.findByIdAndDelete(userID).exec();
 }
 
+async function addFollow(userID, follow) {
+  let user = await User.findById(userID);
+  user.follows.push(follow.toString());
+  let updatedUser = await user.save();
+}
+
+async function removeFollow(userID, follow) {
+  let user = await User.findById(userID);
+  user.follows.pull(follow.toString());
+  let updatedUser = await user.save();
+}
+
+async function viewFollows(userID) {
+  let user = await User.findById(userID);
+  return user.follows;
+}
+
 // ------ Middleware functions ------
 
 // Ensure the given JWT from Headers is valid, provide
@@ -246,4 +263,7 @@ module.exports = {
   uniqueEmailCheck,
   uniqueUsernameCheck,
   handleErrors,
+  addFollow,
+  removeFollow,
+  viewFollows,
 };

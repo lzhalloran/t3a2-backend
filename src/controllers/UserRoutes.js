@@ -30,6 +30,9 @@ const {
   uniqueUsernameCheck,
   handleErrors,
   getUsers,
+  addFollow,
+  removeFollow,
+  viewFollows,
 } = require("./UserFunctions");
 
 // Register a new user
@@ -202,6 +205,47 @@ router.delete(
   handleErrors,
   async (request, response) => {
     response.json(await deleteUser(request.headers.userID));
+  }
+);
+
+// Add a follow to the user
+router.post(
+  "/follows/:follow",
+  verifyJWTHeader,
+  verifyJWTUserID,
+  handleErrors,
+  async (request, response) => {
+    await addFollow(request.headers.userID, request.params.follow);
+    response.json({
+      message: "Follow added successfully",
+    });
+  }
+);
+
+// Remove a follow from the user
+router.delete(
+  "/follows/:follow",
+  verifyJWTHeader,
+  verifyJWTUserID,
+  handleErrors,
+  async (request, response) => {
+    await removeFollow(request.headers.userID, request.params.follow);
+    response.json({
+      message: "Follow removed successfully",
+    });
+  }
+);
+
+// View follows
+router.get(
+  "/follows/list",
+  verifyJWTHeader,
+  verifyJWTUserID,
+  handleErrors,
+  async (request, response) => {
+    response.json({
+      follows: await viewFollows(request.headers.userID),
+    });
   }
 );
 
