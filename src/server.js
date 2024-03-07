@@ -32,6 +32,7 @@ var corsOptions = {
     "http://localhost:5000",
     "http://localhost:3000",
     "https://convokers.netlify.app/",
+    "https://convokers.netlify.app",
   ],
   optionsSuccessStatus: 200,
 };
