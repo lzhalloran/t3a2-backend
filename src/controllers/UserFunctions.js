@@ -108,6 +108,7 @@ async function createUser(userData) {
     username: userData.username,
     about: userData.about,
     name: userData.name,
+    avatarImg: userData.avatarImg,
   });
 
   return await newUser.save();
@@ -119,7 +120,7 @@ async function getUserByID(userID) {
 }
 
 // Read all users
-async function getUsers(){
+async function getUsers() {
   return await User.find();
 }
 
@@ -136,20 +137,21 @@ async function updateUser(userData) {
 // Update user with new partial data
 async function partialUpdateUser(userData) {
   jwtUser = await getUserByID(userData.userID);
-  // if(userData.updatedData.password) {
-  //   userData.updatedData.password = await hashString(
-  //     userData.updatedData.password
-  //   );
-  // } else {
-  //   userData.updatedData.password = jwtUser.password;
-  // }
-  userData.updatedData.password = userData.updatedData.password ? await hashString(userData.updatedData.password) : jwtUser.password;
-  userData.updatedData.name = userData.updatedData.name ? userData.updatedData.name : jwtUser.name;
-  userData.updatedData.about = userData.updatedData.about ? userData.updatedData.about : jwtUser.about;
+  userData.updatedData.password = userData.updatedData.password
+    ? await hashString(userData.updatedData.password)
+    : jwtUser.password;
+  userData.updatedData.name = userData.updatedData.name
+    ? userData.updatedData.name
+    : jwtUser.name;
+  userData.updatedData.about = userData.updatedData.about
+    ? userData.updatedData.about
+    : jwtUser.about;
+  userData.updatedData.avatarImg = userData.updatedData.avatarImg
+    ? userData.updatedData.avatarImg
+    : jwtUser.avatarImg;
   userData.updatedData.username = jwtUser.username;
   userData.updatedData.email = jwtUser.email;
 
-  
   return await User.findByIdAndUpdate(userData.userID, userData.updatedData, {
     returnDocument: "after",
   }).exec();
