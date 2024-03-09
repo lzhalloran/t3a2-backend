@@ -58,6 +58,7 @@ router.post(
       username: request.body.username,
       about: "",
       name: request.body.name,
+      avatarImg: request.body.avatarImg ? request.body.avatarImg : "",
     };
     let newUser = await createUser(userData);
 
